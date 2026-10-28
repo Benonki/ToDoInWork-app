@@ -1,0 +1,53 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id          String     @id @default(uuid())
+  firebaseUid String     @unique
+  email       String     @unique
+  displayName String?
+  info        Json?
+  tasks       Task[]
+  taskItems   TaskItem[]
+}
+
+model Task {
+  id     String   @id @default(uuid())
+  userId String
+  date   DateTime
+  tasks  Json
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model TaskItem {
+  id          String   @id @default(uuid())
+  userId      String
+  date        DateTime
+  startTime   DateTime
+  endTime     DateTime
+  title       String   @default("")
+  description String   @default("")
+  color       String   @default("#4A90E2")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tags Tag[]
+
+  @@index([userId, date])
+  @@index([userId, startTime])
+}
+
+model Tag {
+  id             String     @id @default(uuid())
+  name           String
+  normalizedName String     @unique
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+  taskItems      TaskItem[]
+}

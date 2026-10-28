@@ -1,0 +1,38 @@
+# intelij
+.idea/
+
+# dependencies
+Frontend/node_modules/
+BackendMongo/node_modules/
+BackendPostgreSQL/node_modules/
+
+# Native
+*.orig.*
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+
+# Metro
+.metro-health-check*
+
+# debug
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+
+# macOS
+.DS_Store
+*.pem
+
+# env files
+BackendMongo/.env
+BackendMongo/*.env
+BackendPostgreSQL/.env
+BackendPostgreSQL/*.env
+**/.env
+
+BackendPostgreSQL/generated/prisma
+BackendMongo/serviceAccountKey.json
+BackendPostgreSQL/serviceAccountKey.json

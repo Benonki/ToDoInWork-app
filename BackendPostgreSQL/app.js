@@ -1,0 +1,69 @@
+const express = require("express");
+const cors = require("cors");
+require("dotenv").config();
+
+const prisma = require("./lib/prismaClient");
+
+const UserRepository = require("./repositories/UserRepository");
+const TaskRepository = require("./repositories/TaskRepository");
+const TagRepository = require("./repositories/TagRepository");
+const AuthService = require("./services/AuthService");
+const AuthController = require("./controllers/AuthController");
+const createAuthRoutes = require("./routes/authRoutes");
+const UserService = require("./services/UserService");
+const UserController = require("./controllers/UserController");
+const createUserRoutes = require("./routes/userRoutes");
+const TaskService = require("./services/TaskService");
+const TaskController = require("./controllers/TaskController");
+const createTaskRoutes = require("./routes/taskRoutes");
+const TaskInitialData = require("./initialData/TaskInitialData");
+
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+app.use(
+  cors({
+    origin: "http://localhost:5173",
+  }),
+);
+
+app.use(express.json());
+
+app.get("/", (req, res) => {
+  res.json({ message: "hello world!" });
+});
+
+const userRepository = new UserRepository(prisma);
+const taskRepository = new TaskRepository(prisma);
+const tagRepository = new TagRepository(prisma);
+const authService = new AuthService(userRepository);
+const authController = new AuthController(authService);
+const userService = new UserService(userRepository);
+const userController = new UserController(userService);
+const taskService = new TaskService(
+  userRepository,
+  taskRepository,
+  tagRepository,
+);
+const taskController = new TaskController(taskService);
+
+app.use("/auth", createAuthRoutes(authController));
+app.use("/users", createUserRoutes(userController));
+app.use("/tasks", createTaskRoutes(taskController));
+
+async function startServer() {
+  try {
+    const taskInitialData = new TaskInitialData(prisma);
+    await taskInitialData.insertIfTaskTablesAreEmpty();
+
+    app.listen(PORT, () => {
+      console.log(`Server running on port: ${PORT}`);
+    });
+  } catch (error) {
+    console.error("Blad krytyczny przy uruchamianiu serwera:", error);
+    await prisma.$disconnect();
+    process.exit(1);
+  }
+}
+
+startServer();
